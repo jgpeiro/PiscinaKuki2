@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Calendario de Horas Disponibles - Junio 2025</title>
     <style>
         * {
@@ -92,12 +92,32 @@
             min-height: 30px;
             position: relative;
             overflow: hidden;
-        }
-
-        .time-slot:hover {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
+        }        .time-slot:hover {
             border-color: #4a5568;
             transform: scale(1.05);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .time-slot:active {
+            transform: scale(0.95);
+        }
+
+        /* Mejorar el feedback visual en móviles */
+        @media (hover: none) and (pointer: coarse) {
+            .time-slot:hover {
+                transform: none;
+            }
+            
+            .time-slot:active {
+                transform: scale(0.95);
+                background-color: rgba(0, 0, 0, 0.1);
+            }
         }
 
         .time-slot.score--2 {
@@ -260,23 +280,8 @@
         }        .btn-import:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(66, 153, 225, 0.4);
-        }
-
-        .btn:hover {
+        }        .btn:hover {
             transform: translateY(-2px);
-        }
-
-        .json-output {
-            background: #2d3748;
-            color: #e2e8f0;
-            padding: 20px;
-            border-radius: 15px;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            white-space: pre-wrap;
-            max-height: 300px;
-            overflow-y: auto;
-            border: 3px solid #4a5568;
         }
 
         .legend {
@@ -394,27 +399,84 @@
 
         .file-input {
             display: none;
-        }
-
-        @media (max-width: 768px) {
+        }        @media (max-width: 768px) {
             .container {
                 padding: 15px;
             }
             
             .calendar-grid {
                 font-size: 10px;
+                gap: 2px;
             }
             
             .controls {
                 flex-direction: column;
                 align-items: center;
+                gap: 10px;
             }
+            
+            .time-slot {
+                min-height: 35px;
+                border-radius: 6px;
+            }
+            
+            .time-label, .day-header {
+                min-height: 35px;
+                font-size: 11px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            /* Mejorar controles de puntuación en móviles */
+            .controls label {
+                padding: 8px 12px;
+                border-radius: 20px;
+                background: rgba(255, 255, 255, 0.9);
+                margin: 2px;
+                border: 1px solid #ddd;
+            }
+            
+            .controls input[type="radio"] {
+                transform: scale(1.5);
+                margin-right: 8px;
+            }
+        }
+
+        /* Estilos específicos para dispositivos táctiles */
+        .touch-device .time-slot {
+            min-height: 40px;
+        }
+        
+        .touch-device .time-label, 
+        .touch-device .day-header {
+            min-height: 40px;
+            font-size: 12px;
+        }
+        
+        .touch-device .rectangular-selection {
+            border-width: 4px;
+            animation: touchDashAnimation 0.8s linear infinite;
+        }
+        
+        @keyframes touchDashAnimation {
+            0% { border-color: #007bff; opacity: 0.8; }
+            50% { border-color: #0056b3; opacity: 1; }
+            100% { border-color: #007bff; opacity: 0.8; }
         }
     </style>
 </head>
-<body>    <div class="container">
-        <h1>📅 Calendario de Horas Disponibles</h1>
+<body>    <div class="container">        <h1>📅 Calendario de Horas Disponibles</h1>
         <h2 style="text-align: center; color: #666; margin-bottom: 20px;">20 Junio - 20 Julio 2025</h2>
+        
+        <!-- Mensaje de ayuda para dispositivos móviles -->
+        <div id="mobileHelp" style="display: none; background: #e3f2fd; border: 1px solid #2196f3; border-radius: 10px; padding: 15px; margin-bottom: 20px; text-align: center; color: #1976d2;">
+            <strong>💡 Ayuda para móviles:</strong><br>
+            • <strong>Toque simple:</strong> Seleccionar una celda<br>
+            • <strong>Mantener y arrastrar:</strong> Seleccionar múltiples celdas<br>
+            • <strong>Toque en hora/día:</strong> Seleccionar fila/columna completa
+        </div>
           <!-- Campo de nombre de usuario -->
         <div style="text-align: center; margin-bottom: 20px;">
             <input type="text" id="userName" placeholder="Usuario" readonly
@@ -450,16 +512,11 @@
             <button class="btn" style="background: linear-gradient(45deg, #ffc107, #e0a800); color: #333; box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);" onclick="showDefaultsModal()">🔄 Defaults</button>
         </div>
         
-        <!-- Lista de archivos importados -->
-        <div id="importedFiles" style="margin: 20px 0; display: none;">
+        <!-- Lista de archivos importados -->        <div id="importedFiles" style="margin: 20px 0; display: none;">
             <h3 style="text-align: center; color: #333; margin-bottom: 15px;">Archivos Importados</h3>
             <div id="filesList" style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;"></div>
         </div>
-        
-        <div class="json-output" id="jsonOutput">
-Los horarios seleccionados aparecerán aquí en formato JSON...
-        </div>
-    </div>    <!-- Modal para confirmación de limpiar -->
+    </div><!-- Modal para confirmación de limpiar -->
     <div id="clearModal" class="modal">
         <div class="modal-content">
             <h3>🗑️ Confirmar Limpieza</h3>
@@ -694,19 +751,34 @@ Los horarios seleccionados aparecerán aquí en formato JSON...
                     const timeSlot = document.createElement('div');
                     timeSlot.className = 'time-slot';
                     timeSlot.dataset.day = dayIndex;
-                    timeSlot.dataset.hour = hour;
-                      // Event listeners
+                    timeSlot.dataset.hour = hour;                    // Event listeners
                     timeSlot.addEventListener('click', (e) => handleTimeSlotClick(dayIndex, hour, timeSlot, e));
                     timeSlot.addEventListener('mousedown', (e) => handleMouseDown(dayIndex, hour, e));
-                    timeSlot.addEventListener('touchstart', (e) => handleTouchStart(dayIndex, hour, e));
+                    timeSlot.addEventListener('touchstart', (e) => handleTouchStart(dayIndex, hour, e), { passive: false });
                     timeSlot.addEventListener('mouseenter', (e) => handleMouseEnter(dayIndex, hour, e));
                     timeSlot.addEventListener('mouseleave', handleMouseLeave);
+                    timeSlot.addEventListener('touchmove', (e) => {
+                        // Detectar si el touch se mueve sobre esta celda
+                        const touch = e.touches[0];
+                        const rect = timeSlot.getBoundingClientRect();
+                        if (touch.clientX >= rect.left && touch.clientX <= rect.right &&
+                            touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
+                            handleTouchMove(dayIndex, hour, e);
+                        }
+                    }, { passive: false });
                     
                     calendar.appendChild(timeSlot);
                 }
             });
         }        // Manejar click en slot de tiempo
         function handleTimeSlotClick(dayIndex, hour, element, event) {
+            // En dispositivos táctiles, mostrar tooltip al hacer click
+            const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+            if (isTouchDevice && !isSelecting) {
+                showTooltip(dayIndex, hour, event);
+                setTimeout(() => hideTooltip(), 3000); // Ocultar después de 3 segundos
+            }
+            
             if (!rectangularSelection.active) {
                 // Comportamiento normal cuando no está en modo rectangular
                 toggleTimeSlot(dayIndex, hour, element);
@@ -803,16 +875,19 @@ Los horarios seleccionados aparecerán aquí en formato JSON...
             updateJsonOutput();
         }        // Funciones para selección rectangular
         let isSelecting = false;
+        let touchStartTime = 0;
 
         function addRectangularSelectionListeners() {
             document.addEventListener('mouseup', handleDocumentMouseUp);
-            document.addEventListener('touchend', handleDocumentMouseUp);
+            document.addEventListener('touchend', handleDocumentTouchEnd);
+            document.addEventListener('touchmove', handleDocumentTouchMove, { passive: false });
         }
 
         function removeRectangularSelectionListeners() {
             document.removeEventListener('mouseup', handleDocumentMouseUp);
-            document.removeEventListener('touchend', handleDocumentMouseUp);
-        }function handleMouseDown(dayIndex, hour, event) {
+            document.removeEventListener('touchend', handleDocumentTouchEnd);
+            document.removeEventListener('touchmove', handleDocumentTouchMove);
+        }        function handleMouseDown(dayIndex, hour, event) {
             if (!rectangularSelection.active) return;
             
             event.preventDefault();
@@ -824,7 +899,18 @@ Los horarios seleccionados aparecerán aquí en formato JSON...
         }
 
         function handleTouchStart(dayIndex, hour, event) {
-            handleMouseDown(dayIndex, hour, event);
+            if (!rectangularSelection.active) return;
+            
+            event.preventDefault();
+            touchStartTime = Date.now();
+            isSelecting = true;
+            rectangularSelection.startCell = { day: parseInt(dayIndex), hour };
+            rectangularSelection.endCell = { day: parseInt(dayIndex), hour };
+            clearRectangularSelection();
+            updateRectangularSelection();
+            
+            // Prevenir el comportamiento por defecto del navegador
+            event.stopPropagation();
         }
 
         function handleMouseEnter(dayIndex, hour, event) {
@@ -837,6 +923,15 @@ Los horarios seleccionados aparecerán aquí en formato JSON...
             // Rectangular selection functionality
             if (!rectangularSelection.active || !isSelecting || !rectangularSelection.startCell) return;
             
+            rectangularSelection.endCell = { day: parseInt(dayIndex), hour };
+            updateRectangularSelection();
+        }
+
+        function handleTouchMove(dayIndex, hour, event) {
+            // Rectangular selection functionality para touch
+            if (!rectangularSelection.active || !isSelecting || !rectangularSelection.startCell) return;
+            
+            event.preventDefault();
             rectangularSelection.endCell = { day: parseInt(dayIndex), hour };
             updateRectangularSelection();
         }
@@ -864,7 +959,67 @@ Los horarios seleccionados aparecerán aquí en formato JSON...
                 updateJsonOutput();
             }
             isSelecting = false;
-        }        function updateRectangularSelection() {
+        }
+
+        function handleDocumentTouchEnd(event) {
+            if (rectangularSelection.active && isSelecting) {
+                const touchDuration = Date.now() - touchStartTime;
+                
+                // Si es un toque rápido (< 300ms) y no hay selección múltiple, tratar como click normal
+                if (touchDuration < 300 && rectangularSelection.selectedCells.length <= 1) {
+                    // Buscar la celda tocada
+                    const touch = event.changedTouches[0];
+                    const element = document.elementFromPoint(touch.clientX, touch.clientY);
+                    if (element && element.classList.contains('time-slot')) {
+                        const dayIndex = element.dataset.day;
+                        const hour = element.dataset.hour;
+                        clearRectangularSelection();
+                        toggleTimeSlot(dayIndex, hour, element);
+                        isSelecting = false;
+                        return;
+                    }
+                }
+                
+                // Selección múltiple - aplicar puntuación
+                if (rectangularSelection.selectedCells.length > 0) {
+                    const score = getScoreMode();
+                    const userName = getCurrentUser();
+                    
+                    if (!calendarData[userName]) {
+                        calendarData[userName] = {};
+                    }
+                    
+                    rectangularSelection.selectedCells.forEach(cellData => {
+                        const slotId = `${cellData.day}-${cellData.hour}`;
+                        calendarData[userName][slotId] = score;
+                    });
+                    
+                    clearRectangularSelection();
+                    updateCalendarDisplay();
+                    updateJsonOutput();
+                }
+            }
+            isSelecting = false;
+        }
+
+        function handleDocumentTouchMove(event) {
+            if (!rectangularSelection.active || !isSelecting) return;
+            
+            event.preventDefault();
+            
+            const touch = event.touches[0];
+            const element = document.elementFromPoint(touch.clientX, touch.clientY);
+            
+            if (element && element.classList.contains('time-slot')) {
+                const dayIndex = parseInt(element.dataset.day);
+                const hour = element.dataset.hour;
+                
+                if (rectangularSelection.startCell) {
+                    rectangularSelection.endCell = { day: dayIndex, hour };
+                    updateRectangularSelection();
+                }
+            }
+        }function updateRectangularSelection() {
             if (!rectangularSelection.startCell || !rectangularSelection.endCell) return;
             
             // Limpiar selección anterior pero mantener las celdas seleccionadas para el array
@@ -972,42 +1127,14 @@ Los horarios seleccionados aparecerán aquí en formato JSON...
                     slot.setAttribute('data-score', score);
                 }
             });
-        }        // Actualizar la salida JSON
+        }        // Actualizar datos internos (sin visualización JSON)
         function updateJsonOutput() {
             const userName = getCurrentUser();
             const userScores = calendarData[userName] || {};
             
-            // Agrupar por días con fechas reales
-            const groupedData = {};
-            Object.keys(userScores).forEach(slotId => {
-                const [dayIndex, hour] = slotId.split('-');
-                const date = getDateFromDayIndex(parseInt(dayIndex));
-                // Usar formato local para evitar problemas de zona horaria
-                const dateKey = date.getFullYear() + '-' + 
-                              String(date.getMonth() + 1).padStart(2, '0') + '-' + 
-                              String(date.getDate()).padStart(2, '0');
-                
-                if (!groupedData[dateKey]) {
-                    groupedData[dateKey] = {};
-                }
-                groupedData[dateKey][hour] = userScores[slotId];
-            });
-
-            const output = {
-                userName: userName,
-                dateRange: "20 Junio - 20 Julio 2025",
-                totalSlots: Object.keys(userScores).length,
-                data: groupedData,
-                summary: {
-                    "-2": Object.values(userScores).filter(s => s === -2).length,
-                    "-1": Object.values(userScores).filter(s => s === -1).length,
-                    "0": Object.values(userScores).filter(s => s === 0).length,
-                    "1": Object.values(userScores).filter(s => s === 1).length,
-                    "2": Object.values(userScores).filter(s => s === 2).length
-                }
-            };
-
-            document.getElementById('jsonOutput').textContent = JSON.stringify(output, null, 2);
+            // Solo mantener los datos internos sin actualizar visualización
+            // Esta función se mantiene para compatibilidad con otras funciones
+            // que dependen de la actualización de datos
         }
 
         // Sistema de archivos importados
@@ -1045,7 +1172,38 @@ Los horarios seleccionados aparecerán aquí en formato JSON...
             }
             
             const fileName = generateFileName();
-            const schedule = document.getElementById('jsonOutput').textContent;
+            const userScores = calendarData[userName];
+            
+            // Generar JSON para guardar
+            const groupedData = {};
+            Object.keys(userScores).forEach(slotId => {
+                const [dayIndex, hour] = slotId.split('-');
+                const date = getDateFromDayIndex(parseInt(dayIndex));
+                const dateKey = date.getFullYear() + '-' + 
+                              String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+                              String(date.getDate()).padStart(2, '0');
+                
+                if (!groupedData[dateKey]) {
+                    groupedData[dateKey] = {};
+                }
+                groupedData[dateKey][hour] = userScores[slotId];
+            });
+
+            const output = {
+                userName: userName,
+                dateRange: "20 Junio - 20 Julio 2025",
+                totalSlots: Object.keys(userScores).length,
+                data: groupedData,
+                summary: {
+                    "-2": Object.values(userScores).filter(s => s === -2).length,
+                    "-1": Object.values(userScores).filter(s => s === -1).length,
+                    "0": Object.values(userScores).filter(s => s === 0).length,
+                    "1": Object.values(userScores).filter(s => s === 1).length,
+                    "2": Object.values(userScores).filter(s => s === 2).length
+                }
+            };
+            
+            const schedule = JSON.stringify(output, null, 2);
             
             const blob = new Blob([schedule], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
@@ -1199,14 +1357,26 @@ Los horarios seleccionados aparecerán aquí en formato JSON...
             // Focus automático en el input de nombre de usuario
             setTimeout(() => {
                 document.getElementById('userNameInput').focus();
-            }, 100);
-
-            // Prevenir selección de texto durante drag en modo rectangular
+            }, 100);            // Prevenir selección de texto durante drag en modo rectangular
             document.addEventListener('selectstart', function(e) {
                 if (rectangularSelection.active && isSelecting) {
                     e.preventDefault();
                 }
             });
+            
+            // Prevenir comportamientos por defecto en dispositivos táctiles
+            document.addEventListener('touchmove', function(e) {
+                if (isSelecting) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+              // Detectar si es un dispositivo táctil
+            const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+            if (isTouchDevice) {
+                document.body.classList.add('touch-device');
+                // Mostrar mensaje de ayuda en dispositivos móviles
+                document.getElementById('mobileHelp').style.display = 'block';
+            }
         });
     </script>
 </body>
