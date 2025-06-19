@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendario de Horas Disponibles - Junio 2025</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }        .calendar-grid {
+            display: grid;
+            grid-template-columns: 80px repeat(31, minmax(25px, 1fr));
+            gap: 1px;
+            margin-bottom: 30px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 15px;
+            overflow-x: auto;
+            width: 100%;
+            max-width: 100%;
+        }        .time-label {
+            background: #4a5568;
+            color: white;
+            padding: 6px 2px;
+            text-align: center;
+            font-size: 10px;
+            font-weight: bold;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 30px;
+        }
+
+        .time-label:hover {
+            background: #2d3748;
+            transform: scale(1.05);
+        }        .day-header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 6px 2px;
+            text-align: center;
+            font-size: 9px;
+            font-weight: bold;
+            border-radius: 6px;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 80px;
+        }
+
+        .day-header:hover {
+            background: linear-gradient(45deg, #5a67d8, #553c9a);
+            transform: scale(1.05);
+        }        .time-slot {
+            background: #e2e8f0;
+            border: 2px solid transparent;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .time-slot:hover {
+            border-color: #4a5568;
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .time-slot.score--2 {
+            background: #dc3545;
+        }
+
+        .time-slot.score--1 {
+            background: #dc354580;
+        }
+
+        .time-slot.score-0 {
+            background: #6c757d;
+        }
+
+        .time-slot.score-1 {
+            background: #28a74580;
+        }
+
+        .time-slot.score-2 {
+            background: #28a745;
+        }
+
+        .time-slot.score--2::before,
+        .time-slot.score--1::before,
+        .time-slot.score-0::before,
+        .time-slot.score-1::before,
+        .time-slot.score-2::before {
+            content: attr(data-score);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: bold;
+            font-size: 10px;
+        }        .rectangular-selection {
+            position: relative;
+            border: 3px dashed #007bff !important;
+            animation: dashAnimation 1s linear infinite;
+            opacity: 0.8;
+        }
+
+        .rectangular-selection.preview--2 {
+            background: #dc3545 !important;
+        }
+
+        .rectangular-selection.preview--1 {
+            background: #dc354580 !important;
+        }
+
+        .rectangular-selection.preview-0 {
+            background: #6c757d !important;
+        }
+
+        .rectangular-selection.preview-1 {
+            background: #28a74580 !important;
+        }
+
+        .rectangular-selection.preview-2 {
+            background: #28a745 !important;
+        }
+
+        @keyframes dashAnimation {
+            0% { border-color: #007bff; }
+            50% { border-color: #0056b3; }
+            100% { border-color: #007bff; }
+        }
+
+        .file-toggle {
+            padding: 8px 16px;
+            border: 2px solid #007bff;
+            border-radius: 20px;
+            background: white;
+            color: #007bff;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .file-toggle.active {
+            background: #007bff;
+            color: white;
+        }
+
+        .file-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+        }
+
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 1000;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .tooltip.show {
+            opacity: 1;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-save {
+            background: linear-gradient(45deg, #48bb78, #38a169);
+            color: white;
+            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+        }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4);
+        }
+
+        .btn-clear {
+            background: linear-gradient(45deg, #f56565, #e53e3e);
+            color: white;
+            box-shadow: 0 4px 15px rgba(245, 101, 101, 0.3);
+        }
+
+        .btn-clear:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 101, 101, 0.4);
+        }
+
+        .btn-import {
+            background: linear-gradient(45deg, #4299e1, #3182ce);
+            color: white;
+            box-shadow: 0 4px 15px rgba(66, 153, 225, 0.3);
+        }        .btn-import:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(66, 153, 225, 0.4);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .json-output {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 3px solid #4a5568;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }        .available { background: #28a745; }
+        .unavailable { background: #e2e8f0; }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal h3 {
+            margin-bottom: 20px;
+            color: #333;
+            text-align: center;
+        }
+
+        .modal input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }        .modal input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        #userName:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .modal-btn {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-btn-primary {
+            background: linear-gradient(45deg, #48bb78, #38a169);
+            color: white;
+        }
+
+        .modal-btn-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .calendar-grid {
+                font-size: 10px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>    <div class="container">
+        <h1>📅 Calendario de Horas Disponibles</h1>
+        <h2 style="text-align: center; color: #666; margin-bottom: 20px;">20 Junio - 20 Julio 2025</h2>
+          <!-- Campo de nombre de usuario -->
+        <div style="text-align: center; margin-bottom: 20px;">
+            <input type="text" id="userName" placeholder="Usuario" readonly
+                   style="padding: 12px 20px; font-size: 16px; border: 2px solid #e2e8f0; border-radius: 25px; width: 300px; max-width: 100%; text-align: center; background-color: #f8f9fa; cursor: not-allowed;">
+        </div>
+          <div class="controls" style="margin-bottom: 20px;">
+            <label style="display: flex; align-items: center; gap: 10px; font-weight: bold; color: #333;">
+                <input type="radio" name="scoreMode" value="-2" style="transform: scale(1.2);">
+                <span style="color: #dc3545;">-2 (Muy mal)</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 10px; font-weight: bold; color: #333;">
+                <input type="radio" name="scoreMode" value="-1" style="transform: scale(1.2);">
+                <span style="color: #dc3545; opacity: 0.7;">-1 (Mal)</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 10px; font-weight: bold; color: #333;">
+                <input type="radio" name="scoreMode" value="0" checked style="transform: scale(1.2);">
+                <span style="color: #6c757d;">0 (Neutral)</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 10px; font-weight: bold; color: #333;">
+                <input type="radio" name="scoreMode" value="1" style="transform: scale(1.2);">
+                <span style="color: #28a745; opacity: 0.7;">+1 (Bien)</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 10px; font-weight: bold; color: #333;">
+                <input type="radio" name="scoreMode" value="2" style="transform: scale(1.2);">
+                <span style="color: #28a745;">+2 (Muy bien)</span>
+            </label>
+        </div>
+
+        <div class="calendar-grid" id="calendar"></div><div class="controls">
+            <button class="btn btn-save" onclick="saveSchedule()">💾 Guardar Horario</button>
+            <button class="btn btn-import" onclick="importSchedule()">📂 Importar Horario</button>
+            <button class="btn btn-clear" onclick="showClearModal()">🗑️ Limpiar Todo</button>
+            <button class="btn" style="background: linear-gradient(45deg, #ffc107, #e0a800); color: #333; box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);" onclick="showDefaultsModal()">🔄 Defaults</button>
+        </div>
+        
+        <!-- Lista de archivos importados -->
+        <div id="importedFiles" style="margin: 20px 0; display: none;">
+            <h3 style="text-align: center; color: #333; margin-bottom: 15px;">Archivos Importados</h3>
+            <div id="filesList" style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;"></div>
+        </div>
+        
+        <div class="json-output" id="jsonOutput">
+Los horarios seleccionados aparecerán aquí en formato JSON...
+        </div>
+    </div>    <!-- Modal para confirmación de limpiar -->
+    <div id="clearModal" class="modal">
+        <div class="modal-content">
+            <h3>🗑️ Confirmar Limpieza</h3>
+            <p style="text-align: center; margin-bottom: 20px; color: #666;">¿Estás seguro de que quieres limpiar todas las selecciones? Esta acción no se puede deshacer.</p>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-primary" onclick="confirmClear()">Sí, limpiar todo</button>
+                <button class="modal-btn modal-btn-secondary" onclick="closeClearModal()">Cancelar</button>
+            </div>
+        </div>
+    </div>    <!-- Modal para confirmación de defaults -->
+    <div id="defaultsModal" class="modal">
+        <div class="modal-content">
+            <h3>🔄 Restaurar Configuración Predeterminada</h3>
+            <p style="text-align: center; margin-bottom: 20px; color: #666;">¿Estás seguro de que quieres restaurar la configuración predeterminada? Esto sobrescribirá todas tus puntuaciones actuales.</p>            <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 20px; font-size: 14px; color: #666;">
+                <strong>Configuración predeterminada:</strong><br>
+                • L-V 17:00-20:00: Muy bien (+2)<br>
+                • S-D 08:00-20:00: Muy bien (+2)<br>
+                • Resto de horarios: Muy mal (-2)
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-primary" onclick="confirmDefaults()">Sí, restaurar</button>
+                <button class="modal-btn modal-btn-secondary" onclick="closeDefaultsModal()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para nombre de usuario inicial -->
+    <div id="userNameModal" class="modal" style="display: block;">
+        <div class="modal-content">
+            <h3>👤 Bienvenido al Calendario</h3>
+            <p style="text-align: center; margin-bottom: 20px; color: #666;">Por favor, ingresa tu nombre de usuario para comenzar:</p>
+            <input type="text" id="userNameInput" placeholder="Tu nombre de usuario" style="width: 100%; padding: 12px; margin-bottom: 20px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 16px;">
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-primary" onclick="confirmUserName()">Comenzar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input de archivo oculto -->
+    <input type="file" id="fileInput" class="file-input" accept=".json" onchange="handleFileImport(event)"><script>        // Configuración del calendario para el rango 20 Junio - 20 Julio 2025
+        const startDate = new Date(2025, 5, 20, 0, 0, 0, 0); // 20 de Junio (mes 5 = Junio)
+        const endDate = new Date(2025, 6, 20, 0, 0, 0, 0);   // 20 de Julio (mes 6 = Julio)
+        const totalDays = Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1; // +1 para incluir el último día
+        const hours = Array.from({length: 24}, (_, i) => `${i.toString().padStart(2, '0')}:00`);
+        
+        // Estado principal del calendario - almacena puntuaciones por usuario
+        let calendarData = {};
+        
+        // Lista de archivos importados y su estado
+        let importedFiles = [];
+          // Estado de selección rectangular - siempre activa
+        let rectangularSelection = {
+            active: true,
+            startCell: null,
+            endCell: null,
+            selectedCells: []
+        };
+        
+        // Tooltip
+        let tooltip = null;
+        let tooltipTimeout = null;
+
+        // Obtener modo de puntuación actual
+        function getScoreMode() {
+            return parseInt(document.querySelector('input[name="scoreMode"]:checked').value);
+        }        // Variables globales
+        let currentUserName = '';
+
+        // Confirmar nombre de usuario inicial
+        function confirmUserName() {
+            const userName = document.getElementById('userNameInput').value.trim();
+            if (!userName) {
+                alert('⚠️ Por favor, ingresa un nombre de usuario.');
+                return;
+            }
+            
+            currentUserName = userName;
+            document.getElementById('userName').value = userName;
+            document.getElementById('userNameModal').style.display = 'none';
+            
+            // Aplicar configuración predeterminada
+            applyDefaultConfiguration();
+        }
+
+        // Obtener nombre de usuario actual
+        function getCurrentUser() {
+            return currentUserName || 'Usuario';
+        }        // Generar nombre de archivo automático
+        function generateFileName() {
+            const userName = getCurrentUser();
+            const now = new Date();
+            const dateStr = now.getFullYear().toString() + 
+                           (now.getMonth() + 1).toString().padStart(2, '0') + 
+                           now.getDate().toString().padStart(2, '0');
+            const timeStr = now.getHours().toString().padStart(2, '0') + 
+                           now.getMinutes().toString().padStart(2, '0');
+            return `${userName}_${dateStr}_${timeStr}`;
+        }        // Función para obtener la fecha real a partir del índice del día
+        function getDateFromDayIndex(dayIndex) {
+            const date = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate() + dayIndex - 1);
+            return date;
+        }// Configuración inicial predeterminada
+        function applyDefaultConfiguration() {
+            const userName = getCurrentUser();
+            if (!calendarData[userName]) {
+                calendarData[userName] = {};
+            }
+
+            for (let dayIndex = 1; dayIndex <= totalDays; dayIndex++) {
+                const date = getDateFromDayIndex(dayIndex);
+                const dayOfWeek = date.getDay(); // 0 = domingo, 1 = lunes, ..., 6 = sábado
+                
+                hours.forEach(hour => {
+                    const hourNum = parseInt(hour.split(':')[0]);
+                    const slotId = `${dayIndex}-${hour}`;
+                    
+                    // L-V (1-5) 00-16h en -2 (rojo)
+                    if (dayOfWeek >= 1 && dayOfWeek <= 5 && hourNum >= 0 && hourNum <= 16) {
+                        calendarData[userName][slotId] = -2;
+                    }
+                    // S-D (6,0) 00-07h en -2 (rojo)
+                    else if ((dayOfWeek === 6 || dayOfWeek === 0) && hourNum >= 0 && hourNum <= 7) {
+                        calendarData[userName][slotId] = -2;
+                    }
+                    // 21-23h todos los días en -2 (rojo)
+                    else if (hourNum >= 21 && hourNum <= 23) {
+                        calendarData[userName][slotId] = -2;
+                    }
+                    // Resto en +2 (verde)
+                    else {
+                        calendarData[userName][slotId] = 2;
+                    }
+
+                    // Para fechas específicas (ejemplo: días 4 y 5 del rango, de 08 a 16 en neutral)
+                    if ((dayIndex === 4 || dayIndex === 5) && hourNum >= 8 && hourNum <= 16) {
+                        calendarData[userName][slotId] = 0;
+                    }
+                });
+            }
+            
+            updateCalendarDisplay();
+            updateJsonOutput();
+        }        // Calcular color normalizado basado en puntuaciones de todos los usuarios activos
+        function calculateNormalizedColor(dayIndex, hour) {
+            const slotId = `${dayIndex}-${hour}`;
+            let totalScore = 0;
+            let userCount = 0;
+            
+            // Sumar puntuaciones de todos los usuarios activos
+            importedFiles.forEach(file => {
+                if (file.active && file.data[slotId] !== undefined) {
+                    totalScore += file.data[slotId];
+                    userCount++;
+                }
+            });
+            
+            // Incluir usuario actual si tiene puntuación
+            const currentUser = getCurrentUser();
+            if (calendarData[currentUser] && calendarData[currentUser][slotId] !== undefined) {
+                totalScore += calendarData[currentUser][slotId];
+                userCount++;
+            }
+            
+            if (userCount === 0) return '#e2e8f0'; // Color por defecto
+            
+            const avgScore = totalScore / userCount;
+            
+            // Normalizar a escala de colores (rojo a verde)
+            // -2 = rojo completo, +2 = verde completo, 0 = gris
+            if (avgScore <= -2) return '#dc3545';
+            if (avgScore >= 2) return '#28a745';
+            
+            if (avgScore < 0) {
+                // Interpolación entre rojo y gris
+                const intensity = Math.abs(avgScore) / 2;
+                const red = Math.round(220 + (108 - 220) * (1 - intensity));
+                const green = Math.round(53 + (117 - 53) * (1 - intensity));
+                const blue = Math.round(69 + (125 - 69) * (1 - intensity));
+                return `rgb(${red}, ${green}, ${blue})`;
+            } else {
+                // Interpolación entre gris y verde
+                const intensity = avgScore / 2;
+                const red = Math.round(108 + (40 - 108) * intensity);
+                const green = Math.round(117 + (167 - 117) * intensity);
+                const blue = Math.round(125 + (69 - 125) * intensity);
+                return `rgb(${red}, ${green}, ${blue})`;
+            }
+        }        // Generar el calendario
+        function generateCalendar() {
+            const calendar = document.getElementById('calendar');
+            calendar.innerHTML = '';
+
+            // Ajustar el grid para el número correcto de días
+            calendar.style.gridTemplateColumns = `100px repeat(${totalDays}, 1fr)`;
+
+            // Celda vacía en la esquina superior izquierda
+            const emptyCell = document.createElement('div');
+            emptyCell.className = 'time-label';
+            emptyCell.textContent = 'Hora';
+            emptyCell.style.cursor = 'default';
+            emptyCell.style.background = '#2d3748';
+            calendar.appendChild(emptyCell);
+
+            // Headers de días
+            for (let dayIndex = 1; dayIndex <= totalDays; dayIndex++) {
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'day-header';
+                dayHeader.dataset.day = dayIndex;
+                const date = getDateFromDayIndex(dayIndex);
+                const dayName = date.toLocaleDateString('es-ES', { weekday: 'short' });
+                const dayNum = date.getDate();
+                const monthName = date.toLocaleDateString('es-ES', { month: 'short' });
+                dayHeader.innerHTML = `${dayName}<br>${dayNum}<br>${monthName}`;
+                dayHeader.addEventListener('click', () => toggleColumn(dayIndex));
+                dayHeader.title = `Click para marcar toda la columna del ${dayNum} de ${monthName}`;
+                calendar.appendChild(dayHeader);
+            }
+
+            // Generar filas de horas
+            hours.forEach(hour => {
+                // Label de hora
+                const timeLabel = document.createElement('div');
+                timeLabel.className = 'time-label';
+                timeLabel.textContent = hour;
+                timeLabel.dataset.hour = hour;
+                timeLabel.addEventListener('click', () => toggleRow(hour));
+                timeLabel.title = `Click para marcar toda la fila de ${hour}`;
+                calendar.appendChild(timeLabel);
+
+                // Slots de tiempo para cada día
+                for (let dayIndex = 1; dayIndex <= totalDays; dayIndex++) {
+                    const timeSlot = document.createElement('div');
+                    timeSlot.className = 'time-slot';
+                    timeSlot.dataset.day = dayIndex;
+                    timeSlot.dataset.hour = hour;
+                      // Event listeners
+                    timeSlot.addEventListener('click', (e) => handleTimeSlotClick(dayIndex, hour, timeSlot, e));
+                    timeSlot.addEventListener('mousedown', (e) => handleMouseDown(dayIndex, hour, e));
+                    timeSlot.addEventListener('touchstart', (e) => handleTouchStart(dayIndex, hour, e));
+                    timeSlot.addEventListener('mouseenter', (e) => handleMouseEnter(dayIndex, hour, e));
+                    timeSlot.addEventListener('mouseleave', handleMouseLeave);
+                    
+                    calendar.appendChild(timeSlot);
+                }
+            });
+        }        // Manejar click en slot de tiempo
+        function handleTimeSlotClick(dayIndex, hour, element, event) {
+            if (!rectangularSelection.active) {
+                // Comportamiento normal cuando no está en modo rectangular
+                toggleTimeSlot(dayIndex, hour, element);
+            }
+            // En modo rectangular, no hacemos nada en el click - todo se maneja en mouseup
+        }
+
+        // Toggle de selección de hora individual
+        function toggleTimeSlot(dayIndex, hour, element) {
+            const userName = getCurrentUser();
+            const slotId = `${dayIndex}-${hour}`;
+            
+            if (!calendarData[userName]) {
+                calendarData[userName] = {};
+            }
+            
+            const score = getScoreMode();
+            
+            // Si ya tiene la misma puntuación, limpiar
+            if (calendarData[userName][slotId] === score) {
+                delete calendarData[userName][slotId];
+            } else {
+                calendarData[userName][slotId] = score;
+            }
+            
+            updateCalendarDisplay();
+            updateJsonOutput();
+        }        // Toggle de fila completa
+        function toggleRow(hour) {
+            const userName = getCurrentUser();
+            const score = getScoreMode();
+            
+            if (!calendarData[userName]) {
+                calendarData[userName] = {};
+            }
+            
+            // Verificar si toda la fila ya tiene la puntuación actual
+            let allHaveScore = true;
+            for (let dayIndex = 1; dayIndex <= totalDays; dayIndex++) {
+                const slotId = `${dayIndex}-${hour}`;
+                if (calendarData[userName][slotId] !== score) {
+                    allHaveScore = false;
+                    break;
+                }
+            }
+            
+            for (let dayIndex = 1; dayIndex <= totalDays; dayIndex++) {
+                const slotId = `${dayIndex}-${hour}`;
+                
+                if (allHaveScore) {
+                    // Si toda la fila tiene la puntuación, limpiarla
+                    delete calendarData[userName][slotId];
+                } else {
+                    // Si no toda la fila tiene la puntuación, aplicarla
+                    calendarData[userName][slotId] = score;
+                }
+            }
+            
+            updateCalendarDisplay();
+            updateJsonOutput();
+        }
+
+        // Toggle de columna completa
+        function toggleColumn(dayIndex) {
+            const userName = getCurrentUser();
+            const score = getScoreMode();
+            
+            if (!calendarData[userName]) {
+                calendarData[userName] = {};
+            }
+            
+            // Verificar si toda la columna ya tiene la puntuación actual
+            let allHaveScore = true;
+            hours.forEach(hour => {
+                const slotId = `${dayIndex}-${hour}`;
+                if (calendarData[userName][slotId] !== score) {
+                    allHaveScore = false;
+                }
+            });
+            
+            hours.forEach(hour => {
+                const slotId = `${dayIndex}-${hour}`;
+                
+                if (allHaveScore) {
+                    // Si toda la columna tiene la puntuación, limpiarla
+                    delete calendarData[userName][slotId];
+                } else {
+                    // Si no toda la columna tiene la puntuación, aplicarla
+                    calendarData[userName][slotId] = score;
+                }
+            });
+            
+            updateCalendarDisplay();
+            updateJsonOutput();
+        }        // Funciones para selección rectangular
+        let isSelecting = false;
+
+        function addRectangularSelectionListeners() {
+            document.addEventListener('mouseup', handleDocumentMouseUp);
+            document.addEventListener('touchend', handleDocumentMouseUp);
+        }
+
+        function removeRectangularSelectionListeners() {
+            document.removeEventListener('mouseup', handleDocumentMouseUp);
+            document.removeEventListener('touchend', handleDocumentMouseUp);
+        }function handleMouseDown(dayIndex, hour, event) {
+            if (!rectangularSelection.active) return;
+            
+            event.preventDefault();
+            isSelecting = true;
+            rectangularSelection.startCell = { day: parseInt(dayIndex), hour };
+            rectangularSelection.endCell = { day: parseInt(dayIndex), hour };
+            clearRectangularSelection();
+            updateRectangularSelection();
+        }
+
+        function handleTouchStart(dayIndex, hour, event) {
+            handleMouseDown(dayIndex, hour, event);
+        }
+
+        function handleMouseEnter(dayIndex, hour, event) {
+            // Tooltip functionality
+            clearTimeout(tooltipTimeout);
+            tooltipTimeout = setTimeout(() => {
+                showTooltip(dayIndex, hour, event);
+            }, 1000);
+            
+            // Rectangular selection functionality
+            if (!rectangularSelection.active || !isSelecting || !rectangularSelection.startCell) return;
+            
+            rectangularSelection.endCell = { day: parseInt(dayIndex), hour };
+            updateRectangularSelection();
+        }
+
+        function handleMouseLeave() {
+            clearTimeout(tooltipTimeout);
+            hideTooltip();
+        }        function handleDocumentMouseUp() {
+            if (rectangularSelection.active && isSelecting && rectangularSelection.selectedCells.length > 0) {
+                // Aplicar puntuación automáticamente al terminar la selección
+                const score = getScoreMode();
+                const userName = getCurrentUser();
+                
+                if (!calendarData[userName]) {
+                    calendarData[userName] = {};
+                }
+                
+                rectangularSelection.selectedCells.forEach(cellData => {
+                    const slotId = `${cellData.day}-${cellData.hour}`;
+                    calendarData[userName][slotId] = score;
+                });
+                
+                clearRectangularSelection();
+                updateCalendarDisplay();
+                updateJsonOutput();
+            }
+            isSelecting = false;
+        }        function updateRectangularSelection() {
+            if (!rectangularSelection.startCell || !rectangularSelection.endCell) return;
+            
+            // Limpiar selección anterior pero mantener las celdas seleccionadas para el array
+            document.querySelectorAll('.rectangular-selection').forEach(el => {
+                el.classList.remove('rectangular-selection', 'preview--2', 'preview--1', 'preview-0', 'preview-1', 'preview-2');
+            });
+            rectangularSelection.selectedCells = [];
+            
+            const startDay = Math.min(rectangularSelection.startCell.day, rectangularSelection.endCell.day);
+            const endDay = Math.max(rectangularSelection.startCell.day, rectangularSelection.endCell.day);
+            const startHourIndex = Math.min(
+                hours.indexOf(rectangularSelection.startCell.hour),
+                hours.indexOf(rectangularSelection.endCell.hour)
+            );
+            const endHourIndex = Math.max(
+                hours.indexOf(rectangularSelection.startCell.hour),
+                hours.indexOf(rectangularSelection.endCell.hour)
+            );
+            
+            const currentScore = getScoreMode();
+            const previewClass = `preview-${currentScore}`;
+            
+            for (let dayIndex = startDay; dayIndex <= endDay; dayIndex++) {
+                for (let hourIndex = startHourIndex; hourIndex <= endHourIndex; hourIndex++) {
+                    const hour = hours[hourIndex];
+                    const element = document.querySelector(`[data-day="${dayIndex}"][data-hour="${hour}"]`);
+                    if (element) {
+                        element.classList.add('rectangular-selection', previewClass);
+                        rectangularSelection.selectedCells.push({ day: dayIndex, hour });
+                    }
+                }
+            }
+        }function clearRectangularSelection() {
+            document.querySelectorAll('.rectangular-selection').forEach(el => {
+                el.classList.remove('rectangular-selection', 'preview--2', 'preview--1', 'preview-0', 'preview-1', 'preview-2');
+            });
+            rectangularSelection.selectedCells = [];
+            if (!isSelecting) {
+                rectangularSelection.startCell = null;
+                rectangularSelection.endCell = null;
+            }
+        }        // Sistema de tooltip
+        function showTooltip(dayIndex, hour, event) {
+            const slotId = `${dayIndex}-${hour}`;
+            const date = getDateFromDayIndex(dayIndex);
+            const dateStr = date.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' });
+            let tooltipContent = `${dateStr}, ${hour}\n`;
+            let hasData = false;
+            
+            // Mostrar puntuaciones de todos los usuarios activos
+            importedFiles.forEach(file => {
+                if (file.active && file.data[slotId] !== undefined) {
+                    tooltipContent += `${file.userName}: ${file.data[slotId]}\n`;
+                    hasData = true;
+                }
+            });
+            
+            // Incluir usuario actual
+            const currentUser = getCurrentUser();
+            if (calendarData[currentUser] && calendarData[currentUser][slotId] !== undefined) {
+                tooltipContent += `${currentUser}: ${calendarData[currentUser][slotId]}\n`;
+                hasData = true;
+            }
+            
+            if (!hasData) {
+                tooltipContent += 'Sin puntuaciones';
+            }
+            
+            if (!tooltip) {
+                tooltip = document.createElement('div');
+                tooltip.className = 'tooltip';
+                document.body.appendChild(tooltip);
+            }
+            
+            tooltip.textContent = tooltipContent;
+            tooltip.style.left = event.pageX + 10 + 'px';
+            tooltip.style.top = event.pageY - 10 + 'px';
+            tooltip.classList.add('show');
+        }
+
+        function hideTooltip() {
+            if (tooltip) {
+                tooltip.classList.remove('show');
+            }
+        }        // Actualizar visualización del calendario
+        function updateCalendarDisplay() {
+            document.querySelectorAll('.time-slot').forEach(slot => {
+                const dayIndex = slot.dataset.day;
+                const hour = slot.dataset.hour;
+                const userName = getCurrentUser();
+                const slotId = `${dayIndex}-${hour}`;
+                
+                // Limpiar clases de puntuación
+                slot.classList.remove('score--2', 'score--1', 'score-0', 'score-1', 'score-2');
+                slot.removeAttribute('data-score');
+                
+                // Aplicar color normalizado
+                const color = calculateNormalizedColor(dayIndex, hour);
+                slot.style.background = color;
+                
+                // Mostrar puntuación del usuario actual si existe
+                if (calendarData[userName] && calendarData[userName][slotId] !== undefined) {
+                    const score = calendarData[userName][slotId];
+                    slot.classList.add(`score-${score}`);
+                    slot.setAttribute('data-score', score);
+                }
+            });
+        }        // Actualizar la salida JSON
+        function updateJsonOutput() {
+            const userName = getCurrentUser();
+            const userScores = calendarData[userName] || {};
+            
+            // Agrupar por días con fechas reales
+            const groupedData = {};
+            Object.keys(userScores).forEach(slotId => {
+                const [dayIndex, hour] = slotId.split('-');
+                const date = getDateFromDayIndex(parseInt(dayIndex));
+                // Usar formato local para evitar problemas de zona horaria
+                const dateKey = date.getFullYear() + '-' + 
+                              String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+                              String(date.getDate()).padStart(2, '0');
+                
+                if (!groupedData[dateKey]) {
+                    groupedData[dateKey] = {};
+                }
+                groupedData[dateKey][hour] = userScores[slotId];
+            });
+
+            const output = {
+                userName: userName,
+                dateRange: "20 Junio - 20 Julio 2025",
+                totalSlots: Object.keys(userScores).length,
+                data: groupedData,
+                summary: {
+                    "-2": Object.values(userScores).filter(s => s === -2).length,
+                    "-1": Object.values(userScores).filter(s => s === -1).length,
+                    "0": Object.values(userScores).filter(s => s === 0).length,
+                    "1": Object.values(userScores).filter(s => s === 1).length,
+                    "2": Object.values(userScores).filter(s => s === 2).length
+                }
+            };
+
+            document.getElementById('jsonOutput').textContent = JSON.stringify(output, null, 2);
+        }
+
+        // Sistema de archivos importados
+        function updateImportedFilesList() {
+            const container = document.getElementById('importedFiles');
+            const filesList = document.getElementById('filesList');
+            
+            if (importedFiles.length === 0) {
+                container.style.display = 'none';
+                return;
+            }
+            
+            container.style.display = 'block';
+            filesList.innerHTML = '';
+            
+            importedFiles.forEach((file, index) => {
+                const fileBtn = document.createElement('button');
+                fileBtn.className = `file-toggle ${file.active ? 'active' : ''}`;
+                fileBtn.textContent = file.userName;
+                fileBtn.onclick = () => toggleFileActive(index);
+                filesList.appendChild(fileBtn);
+            });
+        }
+
+        function toggleFileActive(index) {
+            importedFiles[index].active = !importedFiles[index].active;
+            updateImportedFilesList();
+            updateCalendarDisplay();
+        }        // Guardar horario directamente
+        function saveSchedule() {
+            const userName = getCurrentUser();
+            if (!calendarData[userName] || Object.keys(calendarData[userName]).length === 0) {
+                alert('⚠️ No hay puntuaciones para guardar.');
+                return;
+            }
+            
+            const fileName = generateFileName();
+            const schedule = document.getElementById('jsonOutput').textContent;
+            
+            const blob = new Blob([schedule], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${fileName}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            alert('✅ Horario guardado exitosamente!');
+        }
+
+        // Mostrar modal de defaults
+        function showDefaultsModal() {
+            document.getElementById('defaultsModal').style.display = 'block';
+        }
+
+        // Cerrar modal de defaults
+        function closeDefaultsModal() {
+            document.getElementById('defaultsModal').style.display = 'none';
+        }
+
+        // Confirmar y aplicar defaults
+        function confirmDefaults() {
+            applyDefaultConfiguration();
+            closeDefaultsModal();
+            alert('✅ Configuración predeterminada restaurada.');
+        }
+
+        // Mostrar modal de confirmación de limpiar
+        function showClearModal() {
+            document.getElementById('clearModal').style.display = 'block';
+        }
+
+        // Cerrar modal de limpiar
+        function closeClearModal() {
+            document.getElementById('clearModal').style.display = 'none';
+        }
+
+        // Confirmar y limpiar
+        function confirmClear() {
+            const userName = getCurrentUser();
+            if (calendarData[userName]) {
+                delete calendarData[userName];
+            }
+            updateCalendarDisplay();
+            updateJsonOutput();
+            closeClearModal();
+            alert('✅ Todas las puntuaciones han sido limpiadas.');
+        }
+
+        // Importar horario
+        function importSchedule() {
+            document.getElementById('fileInput').click();
+        }
+
+        // Manejar importación de archivo
+        function handleFileImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (file.type !== 'application/json') {
+                alert('⚠️ Por favor, selecciona un archivo JSON válido.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (!data.userName || !data.data) {
+                        alert('⚠️ El archivo JSON no tiene el formato esperado.');
+                        return;
+                    }
+
+                    // Extraer nombre de usuario del nombre del archivo
+                    const fileName = file.name.replace('.json', '');
+                    const userNameFromFile = data.userName || fileName.split('_')[0] || 'Usuario';                    // Convertir datos agrupados a formato plano
+                    const flatData = {};
+                    Object.keys(data.data).forEach(dateOrDay => {
+                        Object.keys(data.data[dateOrDay]).forEach(hour => {
+                            let dayIndex;
+                              // Si es una fecha en formato ISO (YYYY-MM-DD), convertir a índice
+                            if (dateOrDay.includes('-') && dateOrDay.length === 10) {
+                                const [year, month, day] = dateOrDay.split('-').map(Number);
+                                const date = new Date(year, month - 1, day); // month - 1 porque los meses en JS van de 0-11
+                                // Calcular el índice del día basado en la diferencia con startDate
+                                const startDateLocal = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+                                const diffTime = date.getTime() - startDateLocal.getTime();
+                                dayIndex = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                            } else {
+                                // Si es un número (día del mes), usarlo directamente
+                                dayIndex = parseInt(dateOrDay);
+                            }
+                            
+                            if (dayIndex >= 1 && dayIndex <= totalDays) {
+                                const slotId = `${dayIndex}-${hour}`;
+                                flatData[slotId] = data.data[dateOrDay][hour];
+                            }
+                        });
+                    });
+
+                    // Agregar a lista de archivos importados
+                    importedFiles.push({
+                        fileName: fileName,
+                        userName: userNameFromFile,
+                        data: flatData,
+                        active: true
+                    });
+
+                    updateImportedFilesList();
+                    updateCalendarDisplay();
+                    alert('✅ Horario importado exitosamente!');
+
+                } catch (error) {
+                    alert('❌ Error al leer el archivo JSON.');
+                    console.error('Error importing file:', error);
+                }
+            };
+
+            reader.readAsText(file);
+            event.target.value = '';
+        }        // Cerrar modales al hacer clic fuera de ellos
+        window.onclick = function(event) {
+            const clearModal = document.getElementById('clearModal');
+            const defaultsModal = document.getElementById('defaultsModal');
+            
+            if (event.target === clearModal) {
+                closeClearModal();
+            }
+            if (event.target === defaultsModal) {
+                closeDefaultsModal();
+            }
+        }        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            generateCalendar();
+            
+            // Activar selección rectangular automáticamente
+            addRectangularSelectionListeners();
+            
+            // Manejar Enter en el input del nombre de usuario inicial
+            document.getElementById('userNameInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    confirmUserName();
+                }
+            });
+
+            // Focus automático en el input de nombre de usuario
+            setTimeout(() => {
+                document.getElementById('userNameInput').focus();
+            }, 100);
+
+            // Prevenir selección de texto durante drag en modo rectangular
+            document.addEventListener('selectstart', function(e) {
+                if (rectangularSelection.active && isSelecting) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
