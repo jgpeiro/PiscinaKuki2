@@ -35,18 +35,70 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-        }        .calendar-grid {
-            display: grid;
-            grid-template-columns: 80px repeat(31, minmax(25px, 1fr));
-            gap: 1px;
+        }        .calendar-container {
+            position: relative;
             margin-bottom: 30px;
             background: #f8f9fa;
-            padding: 15px;
             border-radius: 15px;
-            overflow-x: auto;
-            width: 100%;
-            max-width: 100%;
-        }        .time-label {
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: 80px repeat(31, minmax(40px, 50px));
+            gap: 1px;
+            background: #f8f9fa;
+            overflow: auto;
+            max-height: 70vh;
+            position: relative;
+        }        /* Scrollbars personalizadas */
+        .calendar-grid::-webkit-scrollbar {
+            width: 45px;
+            height: 45px;
+        }
+
+        .calendar-grid::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .calendar-grid::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 10px;
+            border: 2px solid #f1f1f1;
+        }
+
+        .calendar-grid::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(45deg, #5a67d8, #553c9a);
+        }
+
+        .calendar-grid::-webkit-scrollbar-corner {
+            background: #f1f1f1;
+        }
+
+        .calendar-header-row {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: #f8f9fa;
+            display: contents;
+        }
+
+        .calendar-header-corner {
+            position: sticky;
+            left: 0;
+            top: 0;
+            z-index: 20;
+            background: #2d3748;
+        }
+
+        .calendar-time-column {
+            position: sticky;
+            left: 0;
+            z-index: 10;
+            background: #f8f9fa;
+        }.time-label {
             background: #4a5568;
             color: white;
             padding: 6px 2px;
@@ -59,7 +111,11 @@
             justify-content: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            min-height: 30px;
+            min-height: 35px;
+            position: sticky;
+            left: 0;
+            z-index: 10;
+            background: #4a5568;
         }
 
         .time-label:hover {
@@ -78,6 +134,10 @@
             cursor: pointer;
             transition: all 0.3s ease;
             min-height: 80px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: linear-gradient(45deg, #667eea, #764ba2);
         }
 
         .day-header:hover {
@@ -89,7 +149,7 @@
             border-radius: 4px;
             cursor: pointer;
             transition: all 0.3s ease;
-            min-height: 30px;
+            min-height: 35px;
             position: relative;
             overflow: hidden;
             -webkit-user-select: none;
@@ -98,7 +158,7 @@
             user-select: none;
             -webkit-touch-callout: none;
             -webkit-tap-highlight-color: transparent;
-        }        .time-slot:hover {
+        }.time-slot:hover {
             border-color: #4a5568;
             transform: scale(1.05);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
@@ -407,6 +467,7 @@
             .calendar-grid {
                 font-size: 10px;
                 gap: 2px;
+                max-height: 60vh;
             }
             
             .controls {
@@ -416,12 +477,12 @@
             }
             
             .time-slot {
-                min-height: 35px;
+                min-height: 40px;
                 border-radius: 6px;
             }
             
             .time-label, .day-header {
-                min-height: 35px;
+                min-height: 40px;
                 font-size: 11px;
             }
             
@@ -441,10 +502,26 @@
             .controls input[type="radio"] {
                 transform: scale(1.5);
                 margin-right: 8px;
+            }            /* Scrollbar personalizada para móviles */
+            .calendar-grid::-webkit-scrollbar {
+                width: 40px;
+                height: 40px;
             }
-        }
 
-        /* Estilos específicos para dispositivos táctiles */
+            .calendar-grid::-webkit-scrollbar-track {
+                background: #f1f1f1;
+                border-radius: 10px;
+            }
+
+            .calendar-grid::-webkit-scrollbar-thumb {
+                background: #667eea;
+                border-radius: 10px;
+            }
+
+            .calendar-grid::-webkit-scrollbar-thumb:hover {
+                background: #764ba2;
+            }
+        }        /* Estilos específicos para dispositivos táctiles */
         .touch-device .time-slot {
             min-height: 40px;
         }
@@ -459,6 +536,19 @@
             border-width: 4px;
             animation: touchDashAnimation 0.8s linear infinite;
         }
+
+        .touch-device .calendar-grid {
+            max-height: 65vh;
+        }        .touch-device .calendar-grid::-webkit-scrollbar {
+            width: 40px;
+            height: 40px;
+        }
+
+        .touch-device .calendar-grid::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 15px;
+            border: 1px solid #f1f1f1;
+        }
         
         @keyframes touchDashAnimation {
             0% { border-color: #007bff; opacity: 0.8; }
@@ -468,15 +558,6 @@
     </style>
 </head>
 <body>    <div class="container">        <h1>📅 Calendario de Horas Disponibles</h1>
-        <h2 style="text-align: center; color: #666; margin-bottom: 20px;">20 Junio - 20 Julio 2025</h2>
-        
-        <!-- Mensaje de ayuda para dispositivos móviles -->
-        <div id="mobileHelp" style="display: none; background: #e3f2fd; border: 1px solid #2196f3; border-radius: 10px; padding: 15px; margin-bottom: 20px; text-align: center; color: #1976d2;">
-            <strong>💡 Ayuda para móviles:</strong><br>
-            • <strong>Toque simple:</strong> Seleccionar una celda<br>
-            • <strong>Mantener y arrastrar:</strong> Seleccionar múltiples celdas<br>
-            • <strong>Toque en hora/día:</strong> Seleccionar fila/columna completa
-        </div>
           <!-- Campo de nombre de usuario -->
         <div style="text-align: center; margin-bottom: 20px;">
             <input type="text" id="userName" placeholder="Usuario" readonly
@@ -505,7 +586,9 @@
             </label>
         </div>
 
-        <div class="calendar-grid" id="calendar"></div><div class="controls">
+        <div class="calendar-container">
+            <div class="calendar-grid" id="calendar"></div>
+        </div><div class="controls">
             <button class="btn btn-save" onclick="saveSchedule()">💾 Guardar Horario</button>
             <button class="btn btn-import" onclick="importSchedule()">📂 Importar Horario</button>
             <button class="btn btn-clear" onclick="showClearModal()">🗑️ Limpiar Todo</button>
@@ -710,17 +793,17 @@
             calendar.innerHTML = '';
 
             // Ajustar el grid para el número correcto de días
-            calendar.style.gridTemplateColumns = `100px repeat(${totalDays}, 1fr)`;
+            calendar.style.gridTemplateColumns = `80px repeat(${totalDays}, minmax(40px, 50px))`;
 
-            // Celda vacía en la esquina superior izquierda
+            // Celda vacía en la esquina superior izquierda (sticky en ambas direcciones)
             const emptyCell = document.createElement('div');
-            emptyCell.className = 'time-label';
+            emptyCell.className = 'time-label calendar-header-corner';
             emptyCell.textContent = 'Hora';
             emptyCell.style.cursor = 'default';
             emptyCell.style.background = '#2d3748';
             calendar.appendChild(emptyCell);
 
-            // Headers de días
+            // Headers de días (sticky horizontalmente)
             for (let dayIndex = 1; dayIndex <= totalDays; dayIndex++) {
                 const dayHeader = document.createElement('div');
                 dayHeader.className = 'day-header';
@@ -737,7 +820,7 @@
 
             // Generar filas de horas
             hours.forEach(hour => {
-                // Label de hora
+                // Label de hora (sticky verticalmente)
                 const timeLabel = document.createElement('div');
                 timeLabel.className = 'time-label';
                 timeLabel.textContent = hour;
@@ -751,7 +834,9 @@
                     const timeSlot = document.createElement('div');
                     timeSlot.className = 'time-slot';
                     timeSlot.dataset.day = dayIndex;
-                    timeSlot.dataset.hour = hour;                    // Event listeners
+                    timeSlot.dataset.hour = hour;
+
+                    // Event listeners
                     timeSlot.addEventListener('click', (e) => handleTimeSlotClick(dayIndex, hour, timeSlot, e));
                     timeSlot.addEventListener('mousedown', (e) => handleMouseDown(dayIndex, hour, e));
                     timeSlot.addEventListener('touchstart', (e) => handleTouchStart(dayIndex, hour, e), { passive: false });
@@ -770,7 +855,7 @@
                     calendar.appendChild(timeSlot);
                 }
             });
-        }        // Manejar click en slot de tiempo
+        }// Manejar click en slot de tiempo
         function handleTimeSlotClick(dayIndex, hour, element, event) {
             // En dispositivos táctiles, mostrar tooltip al hacer click
             const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
@@ -1374,8 +1459,6 @@
             const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
             if (isTouchDevice) {
                 document.body.classList.add('touch-device');
-                // Mostrar mensaje de ayuda en dispositivos móviles
-                document.getElementById('mobileHelp').style.display = 'block';
             }
         });
     </script>
