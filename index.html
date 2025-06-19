@@ -42,17 +42,15 @@
             border-radius: 15px;
             overflow: hidden;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .calendar-grid {
+        }        .calendar-grid {
             display: grid;
-            grid-template-columns: 80px repeat(31, minmax(40px, 50px));
+            grid-template-columns: 80px repeat(31, minmax(25px, 50px));
             gap: 1px;
             background: #f8f9fa;
             overflow: auto;
             max-height: 70vh;
             position: relative;
-        }        /* Scrollbars personalizadas */
+        }/* Scrollbars personalizadas */
         .calendar-grid::-webkit-scrollbar {
             width: 45px;
             height: 45px;
@@ -98,7 +96,7 @@
             left: 0;
             z-index: 10;
             background: #f8f9fa;
-        }.time-label {
+        }        .time-label {
             background: #4a5568;
             color: white;
             padding: 6px 2px;
@@ -111,7 +109,7 @@
             justify-content: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            min-height: 35px;
+            min-height: 25px;
             position: sticky;
             left: 0;
             z-index: 10;
@@ -149,7 +147,7 @@
             border-radius: 4px;
             cursor: pointer;
             transition: all 0.3s ease;
-            min-height: 35px;
+            min-height: 25px;
             position: relative;
             overflow: hidden;
             -webkit-user-select: none;
@@ -467,7 +465,7 @@
             .calendar-grid {
                 font-size: 10px;
                 gap: 2px;
-                max-height: 60vh;
+                max-height: 80vh;
             }
             
             .controls {
@@ -477,12 +475,12 @@
             }
             
             .time-slot {
-                min-height: 40px;
+                min-height: 25px;
                 border-radius: 6px;
             }
             
             .time-label, .day-header {
-                min-height: 40px;
+                min-height: 25px;
                 font-size: 11px;
             }
             
@@ -502,7 +500,7 @@
             .controls input[type="radio"] {
                 transform: scale(1.5);
                 margin-right: 8px;
-            }            /* Scrollbar personalizada para móviles */
+            }/* Scrollbar personalizada para móviles */
             .calendar-grid::-webkit-scrollbar {
                 width: 40px;
                 height: 40px;
@@ -523,12 +521,12 @@
             }
         }        /* Estilos específicos para dispositivos táctiles */
         .touch-device .time-slot {
-            min-height: 40px;
+            min-height: 25px;
         }
         
         .touch-device .time-label, 
         .touch-device .day-header {
-            min-height: 40px;
+            min-height: 25px;
             font-size: 12px;
         }
         
@@ -538,8 +536,8 @@
         }
 
         .touch-device .calendar-grid {
-            max-height: 65vh;
-        }        .touch-device .calendar-grid::-webkit-scrollbar {
+            max-height: 80vh;
+        }.touch-device .calendar-grid::-webkit-scrollbar {
             width: 40px;
             height: 40px;
         }
